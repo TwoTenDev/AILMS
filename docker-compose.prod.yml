@@ -1,0 +1,29 @@
+services:
+
+  moodle:
+    environment:
+      MOODLE_HOST: ${DOMAIN}
+    ports: []  # Caddy handles external traffic; don't expose directly
+
+  chatbot:
+    environment:
+      ALLOWED_ORIGINS: https://${DOMAIN}
+    ports: []
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - moodle
+      - chatbot
+
+volumes:
+  caddy_data:
+  caddy_config:

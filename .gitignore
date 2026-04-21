@@ -1,0 +1,11 @@
+.env
+moodle-data/
+moodledata/
+postgres-data/
+caddy/data/
+caddy/config/
+chatbot/knowledge_base.json
+module_outline.md
+__pycache__/
+*.pyc
+.DS_Store

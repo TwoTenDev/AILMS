@@ -1,0 +1,4 @@
+{$DOMAIN} {
+    reverse_proxy /api/* chatbot:8000
+    reverse_proxy * moodle:8080
+}

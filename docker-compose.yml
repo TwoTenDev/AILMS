@@ -1,0 +1,59 @@
+services:
+
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-moodle}
+      POSTGRES_USER: ${POSTGRES_USER:-moodle}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-moodlepass}
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-moodle}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  moodle:
+    image: public.ecr.aws/bitnami/moodle:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MOODLE_DATABASE_TYPE: pgsql
+      MOODLE_DATABASE_HOST: db
+      MOODLE_DATABASE_PORT_NUMBER: 5432
+      MOODLE_DATABASE_NAME: ${POSTGRES_DB:-moodle}
+      MOODLE_DATABASE_USER: ${POSTGRES_USER:-moodle}
+      MOODLE_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-moodlepass}
+      MOODLE_USERNAME: ${MOODLE_ADMIN_USER:-admin}
+      MOODLE_PASSWORD: ${MOODLE_ADMIN_PASSWORD:-GovLearn2025!}
+      MOODLE_EMAIL: ${MOODLE_ADMIN_EMAIL:-admin@govlearn.local}
+      MOODLE_SITE_NAME: "GovLearn – Parliamentary Learning Platform"
+      MOODLE_SKIP_BOOTSTRAP: no
+      # Allow HTTP for local dev; override in prod
+      MOODLE_HOST: ${MOODLE_HOST:-localhost}
+    volumes:
+      - ./moodle-data:/bitnami/moodle
+      - ./moodledata:/bitnami/moodledata
+    ports:
+      - "8080:8080"
+
+  chatbot:
+    build: ./chatbot
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-moodle}:${POSTGRES_PASSWORD:-moodlepass}@db:5432/${POSTGRES_DB:-moodle}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080}
+    ports:
+      - "8000:8000"
+
+networks:
+  default:
+    name: govlearn
