@@ -14,11 +14,14 @@ import os
 import re
 import sys
 import requests
+from urllib.parse import urlparse
 
 # --- CONFIG ---
 
 MOODLE_URL = os.environ.get("MOODLE_URL", "http://192.168.122.153:8080")
 MOODLE_TOKEN = os.environ.get("MOODLE_TOKEN", "d687610cf5075667f4b0c79dea1957c0")
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+CHATBOT_URL = os.environ.get("CHATBOT_URL", "http://localhost:8000")
 CATEGORY_ID = 1  # Default Moodle category
 
 API = f"{MOODLE_URL}/webservice/rest/server.php"
@@ -241,6 +244,65 @@ def create_quiz(course_id: int, section: int, module_id: str, questions: list) -
     print(f"  ✓ Quiz created ({result.get('questioncount', len(questions))} questions)")
 
 
+# --- SELF-ENROLMENT ---
+
+def enable_self_enrolment(course_id: int) -> None:
+    """Enable self-enrolment so users can join without admin intervention."""
+    if not DATABASE_URL:
+        print("  ⚠ DATABASE_URL not set, skipping self-enrolment setup")
+        return
+    try:
+        import psycopg2
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.autocommit = True
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO mdl_enrol (enrol, status, courseid, sortorder, name,
+                                       enrolperiod, expirenotify, expirynotify,
+                                       notifyall, password, cost, currency,
+                                       roleid, customint1, customint2, customint3,
+                                       customint4, customint5, customint6,
+                                       customint7, customint8, timecreated, timemodified)
+                SELECT 'self', 0, %s, 0, 'Self enrolment',
+                       0, 0, 0, 0, '', 0, '',
+                       5, 0, 1, 0, 1, 0, 1, -1, 0,
+                       EXTRACT(EPOCH FROM NOW())::int,
+                       EXTRACT(EPOCH FROM NOW())::int
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM mdl_enrol WHERE enrol='self' AND courseid=%s
+                )
+                """,
+                (course_id, course_id),
+            )
+        conn.close()
+        print("  ✓ Self-enrolment enabled")
+    except Exception as e:
+        print(f"  ⚠ Self-enrolment setup failed: {e}")
+
+
+# --- PGVECTOR INGESTION ---
+
+def ingest_to_pgvector(kb_path: str) -> None:
+    """POST knowledge_base.json chunks to the chatbot /ingest endpoint."""
+    try:
+        with open(kb_path) as f:
+            chunks = json.load(f)
+        if not chunks:
+            print("  ⚠ knowledge_base.json is empty, skipping pgvector ingestion")
+            return
+        ok = 0
+        for chunk in chunks:
+            resp = requests.post(f"{CHATBOT_URL}/ingest", json=chunk, timeout=30)
+            if resp.status_code == 200:
+                ok += 1
+            else:
+                print(f"  ⚠ Ingest chunk failed: {resp.status_code} {resp.text[:120]}")
+        print(f"  ✓ Ingested {ok}/{len(chunks)} chunks into pgvector")
+    except Exception as e:
+        print(f"  ⚠ pgvector ingestion failed: {e}")
+
+
 # --- MAIN ---
 
 def build_course(kb_path: str, module_id: str) -> None:
@@ -297,6 +359,14 @@ def build_course(kb_path: str, module_id: str) -> None:
         create_quiz(course_id, quiz_section, module_id, questions)
     else:
         print("  ⚠ No quiz chunk found in knowledge_base.json")
+
+    # 4. Enable self-enrolment
+    print("\nStep 4: Enabling self-enrolment...")
+    enable_self_enrolment(course_id)
+
+    # 5. Ingest into pgvector for chatbot
+    print("\nStep 5: Ingesting into pgvector...")
+    ingest_to_pgvector(kb_path)
 
     print(f"\n✅ Course built successfully!")
     print(f"   URL: {MOODLE_URL}/course/view.php?id={course_id}")

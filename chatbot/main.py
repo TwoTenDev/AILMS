@@ -168,6 +168,40 @@ class ChatRequest(BaseModel):
     history: list[dict] = []  # [{"role": "user"|"assistant", "content": "..."}]
 
 
+class IngestRequest(BaseModel):
+    module_id: str
+    section: str
+    content: str
+    metadata: dict = {}
+
+
+@app.post("/ingest")
+def ingest(chunk: IngestRequest):
+    """Ingest a single knowledge chunk into pgvector."""
+    with get_db_connection() as conn:
+        existing = conn.execute(text("""
+            SELECT id FROM govlearn_knowledge_chunks
+            WHERE module_id = :module_id AND section = :section
+        """), {"module_id": chunk.module_id, "section": chunk.section}).fetchone()
+        if existing:
+            return {"status": "skipped", "reason": "chunk already exists"}
+
+        embedding = embed_text(chunk.content)
+        conn.execute(text("""
+            INSERT INTO govlearn_knowledge_chunks
+                (module_id, section, content, embedding, metadata)
+            VALUES (:module_id, :section, :content, :embedding, :metadata)
+        """), {
+            "module_id": chunk.module_id,
+            "section": chunk.section,
+            "content": chunk.content,
+            "embedding": str(embedding),
+            "metadata": json.dumps(chunk.metadata),
+        })
+        conn.commit()
+    return {"status": "ok"}
+
+
 @app.get("/api/health")
 def health():
     return {"status": "ok", "service": "govlearn-chatbot"}
