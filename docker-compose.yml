@@ -38,6 +38,7 @@ services:
     volumes:
       - ./moodle-data:/bitnami/moodle
       - ./moodledata:/bitnami/moodledata
+      - ./moodle_plugins/local_govlearn:/bitnami/moodle/public/local/govlearn
     ports:
       - "8080:8080"
 
