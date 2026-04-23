@@ -264,3 +264,7 @@ QUESTION: {req.message}"""
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+from admin_routes import router as admin_router
+app.include_router(admin_router)
+

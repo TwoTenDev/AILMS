@@ -734,7 +734,7 @@ function scormInit() {{
 function scormSave() {{
   if (!S.scorm) return;
   pipwerks.SCORM.set("cmi.core.lesson_location", String(S.idx));
-  pipwerks.SCORM.commit();
+  if (pipwerks.SCORM.save) pipwerks.SCORM.save(); else if (pipwerks.SCORM.commit) pipwerks.SCORM.commit();
 }}
 
 function scormReport(score) {{
@@ -745,7 +745,7 @@ function scormReport(score) {{
   pipwerks.SCORM.set("cmi.core.score.min", "0");
   pipwerks.SCORM.set("cmi.core.score.max", "100");
   pipwerks.SCORM.set("cmi.core.lesson_status", pass ? "passed" : "failed");
-  pipwerks.SCORM.commit();
+  if (pipwerks.SCORM.save) pipwerks.SCORM.save(); else if (pipwerks.SCORM.commit) pipwerks.SCORM.commit();
 }}
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -803,7 +803,8 @@ function updateNav() {{
     prog.textContent = "Page " + S.idx + " of " + N;
     fill.style.width = Math.round((S.idx / (N + 2)) * 100) + "%";
   }} else if (S.idx === QUIZ_I) {{
-    next.disabled = true;
+    next.disabled = !S.quizAnswered;
+    next.innerHTML = (S.quizQ >= QUESTIONS.length - 1 && S.quizAnswered) ? 'Finish <i class="fas fa-check"></i>' : 'Next <i class="fas fa-chevron-right"></i>';
     mid.textContent = "Question " + (Math.min(S.quizQ + 1, QUESTIONS.length)) + " of " + QUESTIONS.length;
     prog.textContent = "Knowledge Check";
     fill.style.width = Math.round(((N + 1) / (N + 2)) * 100) + "%";
@@ -817,6 +818,21 @@ function updateNav() {{
 }}
 
 function go(delta) {{
+  if (S.idx === QUIZ_I && delta === 1) {{
+    // In quiz mode - advance question, not slide
+    if (!S.quizAnswered) return;
+    S.quizQ++;
+    if (S.quizQ >= QUESTIONS.length) {{
+      scormReport(S.quizScore);
+      S.quizDone = true;
+      S.idx = END_I;
+    }}
+    S.quizAnswered = false;
+    render();
+    scormSave();
+    document.querySelector(".c-body").scrollTop = 0;
+    return;
+  }}
   S.idx = Math.max(0, Math.min(END_I, S.idx + delta));
   render();
   scormSave();
@@ -863,14 +879,7 @@ function renderQuiz() {{
     render();
     return;
   }}
-  if (S.quizDone) {{ renderScore(); return; }}
-  if (S.quizQ >= QUESTIONS.length) {{
-    scormReport(S.quizScore);
-    S.quizDone = true;
-    S.idx = END_I;
-    render();
-    return;
-  }}
+  if (S.quizDone || S.idx === END_I) {{ renderScore(); return; }}
   var q = QUESTIONS[S.quizQ];
   S.quizAnswered = false;
   document.getElementById("btnNext").disabled = true;
@@ -920,23 +929,9 @@ function quizAnswer(btn, chosen, correct, explanation) {{
                    correct + '. ' + esc(explanation);
   }}
   // Advance quiz on next click
-  document.getElementById("btnNext").disabled = false;
-  document.getElementById("btnNext").onclick = function() {{
-    S.quizQ++;
-    if (S.quizQ >= QUESTIONS.length) {{
-      scormReport(S.quizScore);
-      S.quizDone = true;
-      S.idx = END_I;
-    }}
-    render();
-    scormSave();
-    document.querySelector(".c-body").scrollTop = 0;
-    // restore default handler
-    document.getElementById("btnNext").onclick = null;
-    document.getElementById("btnPrev").onclick = null;
-  }};
-  // Block prev during quiz
+  S.quizAnswered = true;
   document.getElementById("btnPrev").disabled = true;
+  updateNav();
 }}
 
 function renderScore() {{
@@ -989,10 +984,20 @@ function render() {{
 
 // ─── Boot ─────────────────────────────────────────────────────────
 document.getElementById("btnPrev").addEventListener("click", function() {{ go(-1); }});
-document.getElementById("btnNext").addEventListener("click", function() {{ go(1); }});
 document.getElementById("btnNext").addEventListener("click", function() {{
   if (S.idx === END_I) {{
     if (S.scorm) pipwerks.SCORM.quit();
+    return;
+  }}
+  go(1);
+  if (S.idx === END_I) {{
+    renderScore();
+    document.getElementById("progFill").style.width = "100%";
+    document.getElementById("hProg").textContent = "Complete";
+    document.getElementById("navMid").textContent = "Complete";
+    document.getElementById("btnNext").innerHTML = 'Done ✓';
+    document.getElementById("btnNext").className = "btn btn-success";
+    document.getElementById("btnPrev").disabled = true;
   }}
 }});
 window.addEventListener("beforeunload", function() {{
