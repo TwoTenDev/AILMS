@@ -430,6 +430,147 @@ body {
   .btn      { padding: 8px 16px; font-size: 14px; }
   .welcome-stats { gap: 24px; }
 }
+
+/* ── Stat pill ── */
+.stat-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: .85em;
+  padding: 2px 9px;
+  border-radius: 20px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  margin: 0 2px;
+}
+
+/* ── Bullet grid ── */
+.bullet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.bullet-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bullet-card i { color: #1d4ed8; flex-shrink: 0; margin-top: 2px; font-size: 13px; }
+.bullet-card span { flex: 1; }
+
+/* ── Insight card ── */
+.insight-card {
+  display: flex;
+  gap: 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-left: 4px solid #1d4ed8;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  margin: 14px 0;
+  color: #1e3a5f;
+  line-height: 1.6;
+}
+.insight-card i { color: #1d4ed8; font-size: 17px; flex-shrink: 0; margin-top: 2px; }
+.insight-card span { flex: 1; font-style: italic; }
+
+@media (max-width: 600px) {
+  .bullet-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Key takeaway callout ── */
+.key-takeaway {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%);
+  color: #fff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+.key-takeaway i { font-size: 18px; flex-shrink: 0; margin-top: 2px; opacity: .8; }
+.key-takeaway-body { flex: 1; }
+.key-takeaway-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  opacity: .75;
+  margin-bottom: 5px;
+}
+.key-takeaway-text { font-size: 15px; font-weight: 500; }
+
+/* ── Layout: definition ── */
+.def-card { text-align: center; padding: 36px 32px; }
+.def-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; margin: 0 auto 22px;
+}
+.def-term { font-size: 22px; font-weight: 800; display: block; margin-bottom: 14px; }
+
+/* ── Layout: steps ── */
+.steps-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+.step-row { display: flex; align-items: flex-start; gap: 14px; }
+.step-num {
+  min-width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.step-body { flex: 1; padding-top: 4px; line-height: 1.5; }
+
+/* ── Layout: comparison ── */
+.comparison-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.comp-col { overflow: hidden; }
+.comp-header { padding: 12px 18px; font-weight: 700; font-size: 14px; }
+.comp-body { padding: 16px 18px; }
+
+/* ── Layout: stats ── */
+.stat-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.stat-hero-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px 14px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.10);
+}
+.stat-hero-num { font-size: 30px; font-weight: 800; line-height: 1.1; }
+
+/* ── Layout: overview ── */
+.overview-card { text-align: center; padding: 36px 32px; }
+.overview-icon {
+  width: 80px; height: 80px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin: 0 auto 22px;
+}
+.overview-body { max-width: 580px; margin: 0 auto; text-align: left; }
+
+/* ── Layout: questions / checklist ── */
+.check-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.check-row { display: flex; align-items: flex-start; gap: 12px; }
+.check-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.check-body { flex: 1; line-height: 1.5; }
+
+@media (max-width: 600px) {
+  .comparison-grid { grid-template-columns: 1fr; }
+  .stat-hero-grid { grid-template-columns: repeat(2, 1fr); }
+  .def-card, .overview-card { padding: 24px 20px; }
+}
 """
 
 
@@ -656,7 +797,8 @@ def build_index_html(
 ) -> str:
     slides_json = json.dumps(
         [{"section": s.get("section", ""), "title": s.get("title", s.get("section", "")),
-          "content": s.get("content", "")} for s in slides],
+          "content": s.get("content", ""), "key_takeaway": s.get("key_takeaway", ""),
+          "layout_hint": s.get("layout_hint", "bullets")} for s in slides],
         ensure_ascii=False,
     )
     questions_json = json.dumps(questions, ensure_ascii=False)
@@ -861,15 +1003,200 @@ function renderWelcome() {{
     '</div></div>';
 }}
 
+// ─── Accent palette ──────────────────────────────────────────────
+var PALETTE = [
+  {{bg:'#1e3a5f',text:'#fff',light:'#e8f0fa',dark:'#132540'}},
+  {{bg:'#0f766e',text:'#fff',light:'#e0f7f5',dark:'#0a504a'}},
+  {{bg:'#7c3aed',text:'#fff',light:'#ede9fe',dark:'#5b21b6'}},
+  {{bg:'#c2410c',text:'#fff',light:'#fff3ed',dark:'#9a3412'}},
+  {{bg:'#166534',text:'#fff',light:'#dcfce7',dark:'#14532d'}},
+  {{bg:'#991b1b',text:'#fff',light:'#fee2e2',dark:'#7f1d1d'}},
+  {{bg:'#3730a3',text:'#fff',light:'#e0e7ff',dark:'#312e81'}},
+  {{bg:'#854d0e',text:'#fff',light:'#fef3c7',dark:'#713f12'}}
+];
+function getAccent(idx) {{ return PALETTE[idx % PALETTE.length]; }}
+
+// ─── Section icons ────────────────────────────────────────────────
+var SECTION_ICONS = {{
+  intro:'fa-rocket',overview:'fa-eye',background:'fa-history',
+  purpose:'fa-bullseye',objective:'fa-bullseye',scope:'fa-expand-arrows-alt',
+  policy:'fa-gavel',law:'fa-gavel',legal:'fa-balance-scale',
+  regulation:'fa-file-contract',compliance:'fa-check-double',
+  security:'fa-shield-alt',cyber:'fa-lock',password:'fa-key',access:'fa-key',
+  threat:'fa-exclamation-triangle',risk:'fa-exclamation-triangle',incident:'fa-fire',
+  data:'fa-database',privacy:'fa-user-shield',gdpr:'fa-user-shield',information:'fa-database',
+  finance:'fa-coins',budget:'fa-coins',cost:'fa-coins',funding:'fa-coins',
+  health:'fa-heartbeat',welfare:'fa-heart',wellbeing:'fa-heart',mental:'fa-brain',
+  training:'fa-chalkboard-teacher',learning:'fa-graduation-cap',skill:'fa-graduation-cap',education:'fa-graduation-cap',
+  process:'fa-cogs',procedure:'fa-list-ol',workflow:'fa-project-diagram',system:'fa-server',
+  report:'fa-chart-bar',statistic:'fa-chart-line',analytic:'fa-chart-line',performance:'fa-chart-line',
+  summary:'fa-clipboard-list',conclusion:'fa-flag-checkered',outcome:'fa-flag-checkered',
+  people:'fa-users',team:'fa-users',staff:'fa-user-tie',role:'fa-user-tie',
+  technology:'fa-microchip',digital:'fa-laptop-code',infrastructure:'fa-server',
+  communication:'fa-comments',guidance:'fa-info-circle',support:'fa-life-ring',
+  resource:'fa-folder-open',reference:'fa-book',appendix:'fa-paperclip',
+  environment:'fa-leaf',sustainability:'fa-seedling',
+  emergency:'fa-ambulance',crisis:'fa-fire-extinguisher',continuity:'fa-shield-alt'
+}};
+function getSectionIcon(s) {{
+  var low = (s || '').toLowerCase();
+  for (var k in SECTION_ICONS) {{ if (low.indexOf(k) !== -1) return SECTION_ICONS[k]; }}
+  return 'fa-bookmark';
+}}
+
+// ─── Shared helpers ───────────────────────────────────────────────
+function extractItems(html) {{
+  var items = [];
+  html.replace(/<li>([\s\S]*?)<\/li>/g, function(_, inner) {{ items.push(inner.trim()); return _; }});
+  return items;
+}}
+
+function ktHtml(s, ac) {{
+  if (!s.key_takeaway) return '';
+  return '<div class="key-takeaway" style="background:' + ac.dark + '">' +
+    '<i class="fas fa-star"></i>' +
+    '<div class="key-takeaway-body"><div class="key-takeaway-label">Key Takeaway</div>' +
+    '<div class="key-takeaway-text">' + esc(s.key_takeaway) + '</div></div></div>';
+}}
+
+function enrichWithAccent(html, ac) {{
+  html = html.replace(/<ul>([\s\S]*?)<\/ul>/g, function(_, items) {{
+    var cards = items.replace(/<li>([\s\S]*?)<\/li>/g,
+      '<div class="bullet-card" style="border-left:3px solid ' + ac.bg + '">' +
+      '<i class="fas fa-check-circle" style="color:' + ac.bg + '"></i><span>$1</span></div>');
+    return '<div class="bullet-grid">' + cards + '</div>';
+  }});
+  html = html.replace(
+    /([\$\£\€]\s*[\d,]+(?:\.\d+)?(?:\s*(?:billion|million|bn|m\b|k\b))?|\b\d[\d,.]*\s*(?:%|percent|billion|million|thousand|bn))/gi,
+    '<span class="stat-pill" style="background:' + ac.bg + '">$1</span>'
+  );
+  html = html.replace(/<blockquote>([\s\S]*?)<\/blockquote>/g,
+    '<div class="insight-card" style="border-left-color:' + ac.bg + '">' +
+    '<i class="fas fa-lightbulb" style="color:' + ac.bg + '"></i><span>$1</span></div>');
+  return html;
+}}
+
+// ─── Layout renderers ─────────────────────────────────────────────
+function layoutBullets(s, ac) {{
+  return '<div class="card">' + enrichWithAccent(mdToHtml(s.content), ac) + '</div>';
+}}
+
+function layoutDefinition(s, ac) {{
+  var icon = getSectionIcon(s.section);
+  var html = mdToHtml(s.content);
+  html = html.replace(/<strong>([\s\S]*?)<\/strong>/, '<span class="def-term" style="color:' + ac.bg + '">$1</span>');
+  return '<div class="card def-card">' +
+    '<div class="def-icon" style="background:' + ac.light + ';color:' + ac.bg + '">' +
+    '<i class="fas ' + icon + '"></i></div>' + html + '</div>';
+}}
+
+function layoutSteps(s, ac) {{
+  var html = mdToHtml(s.content);
+  var items = extractItems(html);
+  var introMatch = html.match(/^([\s\S]*?)<(?:ul|div)/);
+  var intro = introMatch && introMatch[1].trim()
+    ? '<div style="margin-bottom:12px">' + introMatch[1].trim() + '</div>' : '';
+  var steps = items.map(function(item, n) {{
+    return '<div class="step-row">' +
+      '<div class="step-num" style="background:' + ac.bg + ';color:' + ac.text + '">' + (n+1) + '</div>' +
+      '<div class="step-body">' + item + '</div></div>';
+  }}).join('');
+  return '<div class="card">' + intro + '<div class="steps-list">' + steps + '</div></div>';
+}}
+
+function layoutComparison(s, ac) {{
+  var html = mdToHtml(s.content);
+  var introMatch = html.match(/^([\s\S]*?)<(?:h[23]|ul|div)/);
+  var intro = introMatch && introMatch[1].trim()
+    ? '<div style="margin-bottom:14px">' + introMatch[1].trim() + '</div>' : '';
+  var h2s = [];
+  html.replace(/<h[23]>([\s\S]*?)<\/h[23]>/g, function(_, h) {{ h2s.push(h); }});
+  if (h2s.length >= 2) {{
+    var parts = html.split(/<h[23]>[\s\S]*?<\/h[23]>/);
+    parts.shift();
+    var c1 = (parts[0] || '').trim(), c2 = (parts[1] || '').trim();
+    return '<div class="card" style="padding:0;overflow:hidden">' + intro +
+      '<div class="comparison-grid">' +
+      '<div class="comp-col"><div class="comp-header" style="background:' + ac.bg + ';color:' + ac.text + '">' + h2s[0] + '</div>' +
+      '<div class="comp-body">' + c1 + '</div></div>' +
+      '<div class="comp-col"><div class="comp-header" style="background:' + ac.dark + ';color:' + ac.text + '">' + h2s[1] + '</div>' +
+      '<div class="comp-body">' + c2 + '</div></div>' +
+      '</div></div>';
+  }}
+  var items = extractItems(html);
+  var half = Math.ceil(items.length / 2);
+  var mk = function(it, col) {{
+    return '<div class="bullet-card" style="border-left:3px solid ' + col + '">' +
+      '<i class="fas fa-check" style="color:' + col + '"></i><span>' + it + '</span></div>';
+  }};
+  var c1h = items.slice(0, half).map(function(it) {{ return mk(it, ac.bg); }}).join('');
+  var c2h = items.slice(half).map(function(it) {{ return mk(it, ac.dark); }}).join('');
+  return '<div class="card" style="padding:0;overflow:hidden">' + intro +
+    '<div class="comparison-grid">' +
+    '<div class="comp-col"><div class="comp-header" style="background:' + ac.bg + ';color:' + ac.text + '">Overview</div>' +
+    '<div class="comp-body"><div class="bullet-grid" style="grid-template-columns:1fr">' + c1h + '</div></div></div>' +
+    '<div class="comp-col"><div class="comp-header" style="background:' + ac.dark + ';color:' + ac.text + '">Detail</div>' +
+    '<div class="comp-body"><div class="bullet-grid" style="grid-template-columns:1fr">' + c2h + '</div></div></div>' +
+    '</div></div>';
+}}
+
+function layoutStats(s, ac) {{
+  var raw = s.content;
+  var statRe = /([\$\£\€]\s*[\d,]+(?:\.\d+)?(?:\s*(?:billion|million|bn|m\b|k\b))?|\b\d[\d,.]*\s*(?:%|percent|billion|million|thousand|bn))/gi;
+  var stats = [], m;
+  while ((m = statRe.exec(raw)) !== null && stats.length < 3) stats.push(m[1]);
+  var heroCards = stats.map(function(st) {{
+    return '<div class="stat-hero-card" style="border-top:4px solid ' + ac.bg + '">' +
+      '<div class="stat-hero-num" style="color:' + ac.bg + '">' + esc(st) + '</div></div>';
+  }}).join('');
+  return (stats.length ? '<div class="stat-hero-grid">' + heroCards + '</div>' : '') +
+    '<div class="card">' + enrichWithAccent(mdToHtml(raw), ac) + '</div>';
+}}
+
+function layoutOverview(s, ac) {{
+  var icon = getSectionIcon(s.section);
+  return '<div class="card overview-card">' +
+    '<div class="overview-icon" style="background:' + ac.light + ';color:' + ac.bg + '">' +
+    '<i class="fas ' + icon + '"></i></div>' +
+    '<div class="overview-body">' + enrichWithAccent(mdToHtml(s.content), ac) + '</div></div>';
+}}
+
+function layoutQuestions(s, ac) {{
+  var html = mdToHtml(s.content);
+  var items = extractItems(html);
+  var introMatch = html.match(/^([\s\S]*?)<(?:ul|div)/);
+  var intro = introMatch && introMatch[1].trim()
+    ? '<div style="margin-bottom:12px">' + introMatch[1].trim() + '</div>' : '';
+  var rows = items.map(function(item) {{
+    return '<div class="check-row">' +
+      '<div class="check-icon" style="color:' + ac.bg + '"><i class="fas fa-circle-check"></i></div>' +
+      '<div class="check-body">' + item + '</div></div>';
+  }}).join('');
+  return '<div class="card">' + intro + '<div class="check-list">' + rows + '</div></div>';
+}}
+
 function renderSlide(i) {{
-  var s = SLIDES[i];
+  var s       = SLIDES[i];
   var section = s.section || "";
-  var title   = s.title   || section;
+  var title   = s.title || section;
+  var icon    = getSectionIcon(section);
+  var ac      = getAccent(i);
+  var hint    = (s.layout_hint || 'bullets').toLowerCase();
+  var body;
+  if      (hint === 'definition')  body = layoutDefinition(s, ac);
+  else if (hint === 'steps')       body = layoutSteps(s, ac);
+  else if (hint === 'comparison')  body = layoutComparison(s, ac);
+  else if (hint === 'stats')       body = layoutStats(s, ac);
+  else if (hint === 'overview')    body = layoutOverview(s, ac);
+  else if (hint === 'questions')   body = layoutQuestions(s, ac);
+  else                             body = layoutBullets(s, ac);
   document.getElementById("main").innerHTML =
     '<div class="slide-wrap fade-up">' +
-    (section ? '<div class="slide-tag"><i class="fas fa-bookmark"></i> ' + esc(section) + '</div>' : '') +
+    '<div style="border-left:4px solid ' + ac.bg + ';padding-left:14px;margin-bottom:18px">' +
+    (section ? '<div class="slide-tag" style="color:' + ac.bg + '"><i class="fas ' + icon + '"></i> ' + esc(section) + '</div>' : '') +
     '<h1 class="slide-h1">' + esc(title) + '</h1>' +
-    '<div class="card">' + mdToHtml(s.content) + '</div>' +
+    '</div>' +
+    body + ktHtml(s, ac) +
     '</div>';
 }}
 
@@ -1048,6 +1375,8 @@ def build_scorm(kb_path: str, module_id: str, output_path: str) -> None:
             "section": section,
             "title": section,
             "content": chunk.get("content", ""),
+            "key_takeaway": chunk.get("key_takeaway", ""),
+            "layout_hint": chunk.get("layout_hint", "bullets"),
         })
 
     # Parse quiz questions

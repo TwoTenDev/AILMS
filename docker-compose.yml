@@ -52,6 +52,8 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
       DATABASE_URL: postgresql://${POSTGRES_USER:-moodle}:${POSTGRES_PASSWORD:-moodlepass}@db:5432/${POSTGRES_DB:-moodle}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8000:8000"
 
