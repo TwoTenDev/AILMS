@@ -29,7 +29,9 @@ Return ONLY valid JSON with this exact structure (no markdown, no preamble):
     {
       "id": "section-slug",
       "section": "Section Title",
-      "content": "350-400 words of learning content written in plain English for non-technical parliamentary staff. Ground everything in the actual policy document provided. Use concrete examples relevant to parliamentary work."
+      "content": "One or two sentence introduction grounded in the document.\\n\\n- **Term or concept**: Brief explanation relevant to parliamentary staff\\n- **Term or concept**: Brief explanation relevant to parliamentary staff\\n- **Term or concept**: Brief explanation relevant to parliamentary staff\\n- **Term or concept**: Brief explanation relevant to parliamentary staff",
+      "key_takeaway": "One punchy sentence (max 20 words) capturing the single most important thing to remember from this section.",
+      "layout_hint": "bullets"
     }
   ],
   "quiz": [
@@ -43,8 +45,19 @@ Return ONLY valid JSON with this exact structure (no markdown, no preamble):
 }
 
 Requirements:
-- Generate 5-7 sections covering the key areas of the policy
-- Write content for non-technical users (parliamentarians, clerks, administrative staff)
+- Generate 8-12 sections covering the key areas of the policy
+- Each section content: 1-2 sentence intro followed by 3-5 bullet points using "- **Term**: explanation" format
+- Target 80-120 words per section content field (not prose paragraphs)
+- key_takeaway: one sentence, max 20 words, capturing the section's core message
+- layout_hint: choose ONE of these values based on the section's content type:
+    "bullets"    — list of concepts or items (default)
+    "definition" — explaining a single key concept or term in depth
+    "steps"      — sequential process or ordered actions to follow
+    "comparison" — two sides, roles, contrasting approaches, or before/after
+    "stats"      — section contains key numbers, percentages, or data points
+    "overview"   — intro or summary slide, high-level framing of the module/topic
+    "questions"  — parliamentary questions, compliance checks, or self-assessment items
+- Write for non-technical users (parliamentarians, clerks, administrative staff)
 - Generate 5 scenario-based quiz questions grounded in the policy
 - Every section must reference specific aspects of the uploaded document
 - Tone: professional, accessible, practical
@@ -60,7 +73,7 @@ def generate_from_pdf(pdf_path: str, module_id: str, title: str) -> tuple:
     print("Sending to Claude for processing...")
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=4096,
+        max_tokens=16000,
         messages=[
             {
                 "role": "user",
@@ -97,6 +110,8 @@ def generate_from_pdf(pdf_path: str, module_id: str, title: str) -> tuple:
             "module_id": module_id,
             "section": section["section"],
             "content": section["content"],
+            "key_takeaway": section.get("key_takeaway", ""),
+            "layout_hint": section.get("layout_hint", "bullets"),
             "metadata": {"section_id": section["id"], "source": "pdf"}
         })
 
