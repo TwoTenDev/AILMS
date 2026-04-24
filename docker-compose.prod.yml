@@ -1,29 +1,34 @@
 services:
-
   moodle:
+    ports: []
     environment:
       MOODLE_HOST: ${DOMAIN}
-    ports: []  # Caddy handles external traffic; don't expose directly
+    networks:
+      - default
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.moodle.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.moodle.entrypoints=websecure"
+      - "traefik.http.routers.moodle.tls.certresolver=letsencrypt"
+      - "traefik.http.services.moodle.loadbalancer.server.port=8080"
+      - "traefik.docker.network=traefik-public"
 
   chatbot:
+    ports: []
     environment:
       ALLOWED_ORIGINS: https://${DOMAIN}
-    ports: []
+    networks:
+      - default
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chatbot.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`, `/admin`, `/ingest`)"
+      - "traefik.http.routers.chatbot.entrypoints=websecure"
+      - "traefik.http.routers.chatbot.tls.certresolver=letsencrypt"
+      - "traefik.http.services.chatbot.loadbalancer.server.port=8000"
+      - "traefik.docker.network=traefik-public"
 
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - moodle
-      - chatbot
-
-volumes:
-  caddy_data:
-  caddy_config:
+networks:
+  traefik-public:
+    external: true
