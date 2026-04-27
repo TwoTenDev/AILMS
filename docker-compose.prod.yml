@@ -1,6 +1,6 @@
 services:
   moodle:
-    ports: []
+    ports: |reset []
     environment:
       MOODLE_HOST: ${DOMAIN}
     networks:
