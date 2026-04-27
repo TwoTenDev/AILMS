@@ -12,7 +12,7 @@ services:
       - "traefik.http.routers.moodle.entrypoints=websecure"
       - "traefik.http.routers.moodle.tls.certresolver=letsencrypt"
       - "traefik.http.services.moodle.loadbalancer.server.port=8080"
-      - "traefik.docker.network=traefik-public"
+      - "traefik.docker.network=proxy"
 
   chatbot:
     ports: []
@@ -27,7 +27,7 @@ services:
       - "traefik.http.routers.chatbot.entrypoints=websecure"
       - "traefik.http.routers.chatbot.tls.certresolver=letsencrypt"
       - "traefik.http.services.chatbot.loadbalancer.server.port=8000"
-      - "traefik.docker.network=traefik-public"
+      - "traefik.docker.network=proxy"
 
 networks:
   proxy:
