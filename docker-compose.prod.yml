@@ -5,7 +5,7 @@ services:
       MOODLE_HOST: ${DOMAIN}
     networks:
       - default
-      - traefik-public
+      - proxy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.moodle.rule=Host(`${DOMAIN}`)"
@@ -20,7 +20,7 @@ services:
       ALLOWED_ORIGINS: https://${DOMAIN}
     networks:
       - default
-      - traefik-public
+      - proxy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.chatbot.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`, `/admin`, `/ingest`)"
@@ -30,5 +30,5 @@ services:
       - "traefik.docker.network=traefik-public"
 
 networks:
-  traefik-public:
+  proxy:
     external: true
